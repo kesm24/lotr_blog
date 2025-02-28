@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 
 class TextType(Enum):
@@ -25,6 +26,11 @@ class TextNode:
             self.text_type == other.text_type and
             self.url == other.url
         )
+
+def extract_markdown_links(markdown: str) -> list[tuple[str, str]]:
+    links = re.findall(r"\[(.*?)\]\((.*?)\)", markdown)
+
+    return links
 
 def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: TextType) -> list[TextNode]:
     new_nodes: list[TextNode] = []

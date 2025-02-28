@@ -1,5 +1,5 @@
 import unittest
-from textnode import TextNode, TextType, split_nodes_delimiter
+from textnode import TextNode, TextType, extract_markdown_links, split_nodes_delimiter
 
 class TestTextNode(unittest.TestCase):
     def test_textnode(self) -> None:
@@ -30,6 +30,31 @@ class TestTextNode(unittest.TestCase):
         self.assertNotEqual(test_nodeA, test_nodeC)
 
 class TestTextNodeUtils(unittest.TestCase):
+    def test_extract_markdown_links(self) -> None:
+        test_markdown1 = "I am a [link](google.com)"
+
+        links1 = extract_markdown_links(test_markdown1)
+        (text1, url1) = links1[0]
+
+        self.assertEqual(text1, "link")
+        self.assertEqual(url1, "google.com")
+
+        test_markdown2 = "I'm a [second](wikipedia.org) [link](google.com)"
+
+        links2 = extract_markdown_links(test_markdown2)
+        [( text2_1, url2_1 ), ( text2_2, url2_2 )] = links2
+
+        self.assertEqual(text2_1, "second")
+        self.assertEqual(url2_1, "wikipedia.org")
+        self.assertEqual(text2_2, "link")
+        self.assertEqual(url2_2, "google.com")
+
+        test_markdown3 = ""
+
+        links3 = extract_markdown_links(test_markdown3)
+
+        self.assertEqual(links3, [])
+
     def test_split_nodes_delimiter(self) -> None:
         text_node = TextNode("I'm a text node", TextType.TEXT)
         bold_node = TextNode("I'm a **bold** node", TextType.TEXT)
