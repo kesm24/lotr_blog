@@ -1,5 +1,5 @@
-def main(hello: str) -> str:
-    print(hello)
-    return hello
+# def main(hello: str) -> str:
+#     print(hello)
+#     return hello
 
-main("Hello World")
+# main("Hello World")
