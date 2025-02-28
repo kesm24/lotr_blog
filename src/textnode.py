@@ -27,15 +27,51 @@ class TextNode:
             self.url == other.url
         )
 
+def extract_markdown_images(markdown: str) -> list[tuple[str, str]]:
+    images = re.findall(r"!\[(.*?)\]\((.*?)\)", markdown)
+
+    return images
+
 def extract_markdown_links(markdown: str) -> list[tuple[str, str]]:
     links = re.findall(r"\[(.*?)\]\((.*?)\)", markdown)
 
     return links
 
-def extract_markdown_images(markdown: str) -> list[tuple[str, str]]:
-    images = re.findall(r"!\[(.*?)\]\((.*?)\)", markdown)
+def split_nodes_links(old_nodes: list[TextNode]) -> list[TextNode]:
+    new_nodes: list[TextNode] = []
 
-    return images
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            new_nodes.append(node)
+            continue
+
+        links = extract_markdown_links(node.text)
+
+        if len(links) == 0:
+            new_nodes.append(node)
+            continue
+
+        remaining_text = node.text
+
+        for (text, url) in links:
+            sections = remaining_text.split(f"[{text}]({url})", maxsplit=1)
+
+            if len(sections) != 2:
+                continue
+
+            [before_text, after_text] = sections
+
+            if before_text != "":
+                new_nodes.append(TextNode(before_text, TextType.TEXT))
+
+            new_nodes.append(TextNode(text, TextType.LINK, url))
+
+            remaining_text = after_text
+
+        if remaining_text != "":
+            new_nodes.append(TextNode(remaining_text, TextType.TEXT))
+
+    return new_nodes
 
 def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: TextType) -> list[TextNode]:
     new_nodes: list[TextNode] = []
