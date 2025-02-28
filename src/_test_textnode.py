@@ -1,5 +1,5 @@
 import unittest
-from textnode import TextNode, TextType, extract_markdown_links, split_nodes_delimiter
+from textnode import TextNode, TextType, extract_markdown_images, extract_markdown_links, split_nodes_delimiter
 
 class TestTextNode(unittest.TestCase):
     def test_textnode(self) -> None:
@@ -54,6 +54,29 @@ class TestTextNodeUtils(unittest.TestCase):
         links3 = extract_markdown_links(test_markdown3)
 
         self.assertEqual(links3, [])
+
+    def test_extract_markdown_images(self) -> None:
+        test_markdown1 = "I'm an ![image](image.jpeg)"
+
+        images1 = extract_markdown_images(test_markdown1)
+        alt1, url1 = images1[0]
+
+        self.assertEqual(alt1, "image")
+        self.assertEqual(url1, "image.jpeg")
+
+        test_markdown2 = "I'm a ![second image](image2.jpeg)"
+
+        images2 = extract_markdown_images(test_markdown2)
+        alt2, url2 = images2[0]
+
+        self.assertEqual(alt2, "second image")
+        self.assertEqual(url2, "image2.jpeg")
+
+        test_markdown2 = ""
+
+        images3 = extract_markdown_images(test_markdown2)
+
+        self.assertEqual(images3, [])
 
     def test_split_nodes_delimiter(self) -> None:
         text_node = TextNode("I'm a text node", TextType.TEXT)
