@@ -32,6 +32,42 @@ def extract_markdown_images(markdown: str) -> list[tuple[str, str]]:
 
     return images
 
+def split_nodes_images(old_nodes: list[TextNode]) -> list[TextNode]:
+    new_nodes: list[TextNode] = []
+
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            new_nodes.append(node)
+            continue
+
+        images = extract_markdown_images(node.text)
+
+        if len(images) == 0:
+            new_nodes.append(node)
+            continue
+
+        remaining_text = node.text
+
+        for (alt, url) in images:
+            sections = remaining_text.split(f"![{alt}]({url})", maxsplit=1)
+
+            if len(sections) != 2:
+                continue
+
+            [before_text, after_text] = sections
+
+            if before_text != "":
+                new_nodes.append(TextNode(before_text, TextType.TEXT))
+
+            new_nodes.append(TextNode(alt, TextType.LINK, url))
+
+            remaining_text = after_text
+
+        if remaining_text != "":
+            new_nodes.append(TextNode(remaining_text, TextType.TEXT))
+
+    return new_nodes
+
 def extract_markdown_links(markdown: str) -> list[tuple[str, str]]:
     links = re.findall(r"\[(.*?)\]\((.*?)\)", markdown)
 
