@@ -1,5 +1,6 @@
 import unittest
-from htmlnode import HTMLNode, LeafNode, ParentNode
+from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node
+from textnode import TextNode, TextType
 
 class TestHTMLNode(unittest.TestCase):
     def test_htmlnode(self) -> None:
@@ -78,13 +79,21 @@ class TestLeafNode(unittest.TestCase):
         self.assertNotEqual(test_nodeA, test_nodeC)
 
     def test_leafnode_to_html(self) -> None:
-        tag = "p"
-        value = "I'm a paragraph"
-        props = { "style": "color: black;" }
+        tag1 = "p"
+        value1 = "I'm a paragraph"
+        props1 = { "style": "color: black;" }
 
-        test_node = LeafNode(tag, value, props)
+        test_node1 = LeafNode(tag1, value1, props1)
 
-        self.assertEqual(test_node.to_html(), f"<{tag} style=\"color: black;\">{value}</{tag}>")
+        self.assertEqual(test_node1.to_html(), f"<{tag1} style=\"color: black;\">{value1}</{tag1}>")
+
+        tag2 = "img"
+        value2 = None
+        props2 = { "src": "image.jpeg", "alt": "image" }
+
+        test_node2 = LeafNode(tag2, value2, props2)
+
+        self.assertEqual(test_node2.to_html(), f"<{tag2} src=\"image.jpeg\" alt=\"image\" />")
 
 class TestParentNode(unittest.TestCase):
     def test_parentnode(self) -> None:
@@ -127,3 +136,13 @@ class TestParentNode(unittest.TestCase):
         test_node = ParentNode(tag, children, props)
 
         self.assertEqual(test_node.to_html(), f"<{tag} style=\"color: black;\">\n\t<p>I'm a paragraph</p>\n</{tag}>")
+
+class TestHTMLNodeUtils(unittest.TestCase):
+    def test_text_node_to_html_node(self) -> None:
+        text_node = TextNode("I'm a text node", TextType.TEXT)
+
+        html_node = LeafNode(None, "I'm a text node", None)
+
+        test_node = text_node_to_html_node(text_node)
+
+        self.assertEqual(test_node.tag, html_node.tag)

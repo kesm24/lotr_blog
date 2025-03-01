@@ -17,6 +17,9 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(test_node.text_type, text_type)
         self.assertEqual(test_node.url, None)
 
+        self.assertRaises(ValueError, TextNode, "I'm a [link](google.com) node", TextType.LINK, None)
+        self.assertRaises(ValueError, TextNode, "I'm an ![image](image.jpeg) node", TextType.IMAGE, None)
+
     def test_textnode_repr(self) -> None:
         text = "I'm a text node"
         text_type = TextType.TEXT

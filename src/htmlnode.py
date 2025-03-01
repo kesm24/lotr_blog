@@ -1,3 +1,5 @@
+from textnode import TextNode, TextType
+
 class HTMLNode:
     def __init__(self, tag: str | None = None, props: dict[str, str] | None = None) -> None:
         self.tag = tag
@@ -28,7 +30,7 @@ class HTMLNode:
         return props_html
 
 class LeafNode(HTMLNode):
-    def __init__(self, tag: str | None, value: str, props: dict[str, str] | None = None) -> None:
+    def __init__(self, tag: str | None, value: str | None, props: dict[str, str] | None = None) -> None:
         super().__init__(tag, props)
         self.value = value
 
@@ -46,6 +48,9 @@ class LeafNode(HTMLNode):
     def to_html(self) -> str:
         if self.tag == None:
             return f"{self.value}"
+
+        if self.value == None:
+            return f"<{self.tag}{self.props_to_html()} />"
 
         return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
 
@@ -113,3 +118,19 @@ class ParentNode(HTMLNode):
 
         return html_str
 
+def text_node_to_html_node(text_node: TextNode) -> LeafNode:
+    match text_node.text_type:
+        case TextType.TEXT:
+            return LeafNode(None, text_node.text)
+        case TextType.BOLD:
+            return LeafNode("b", text_node.text)
+        case TextType.ITALIC:
+            return LeafNode("i", text_node.text)
+        case TextType.CODE:
+            return LeafNode("code", text_node.text)
+        case TextType.LINK:
+            assert isinstance(text_node.url, str)
+            return LeafNode("link", text_node.text, { "href": text_node.url })
+        case TextType.IMAGE:
+            assert isinstance(text_node.url, str)
+            return LeafNode("img", None, { "src": text_node.url, "alt": text_node.text })
