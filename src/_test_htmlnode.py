@@ -1,5 +1,5 @@
 import unittest
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 class TestHTMLNode(unittest.TestCase):
     def test_htmlnode(self) -> None:
@@ -85,3 +85,45 @@ class TestLeafNode(unittest.TestCase):
         test_node = LeafNode(tag, value, props)
 
         self.assertEqual(test_node.to_html(), f"<{tag} style=\"color: black;\">{value}</{tag}>")
+
+class TestParentNode(unittest.TestCase):
+    def test_parentnode(self) -> None:
+        tag = "div"
+        children: list[ParentNode | LeafNode] = [LeafNode("p", "I'm a paragraph")]
+        props = { "style": "color: black;" }
+
+        test_node = ParentNode(tag, children, props)
+
+        self.assertEqual(test_node.tag, tag)
+        self.assertEqual(test_node.children, children)
+        self.assertEqual(test_node.props, props)
+
+    def test_parentnode_repr(self) -> None:
+        tag = "div"
+        children: list[ParentNode | LeafNode] = [ParentNode("p", [LeafNode(None, "I'm a paragraph")])]
+        props = { "style": "color: black;" }
+
+        test_node = ParentNode(tag, children, props)
+
+        self.assertEqual(repr(test_node), f"ParentNode({tag}, [\n\tParentNode(p, [\n\t\tLeafNode(None, I'm a paragraph, None)\n\t], None)\n], {props})")
+
+    def test_parentnode_eq(self) -> None:
+        tag = "div"
+        children: list[ParentNode | LeafNode] = [LeafNode("p", "I'm a paragraph")]
+        props = { "style": "color: black;" }
+
+        test_nodeA = ParentNode(tag, children, props)
+        test_nodeB = ParentNode(tag, children, props)
+        test_nodeC = ParentNode(tag, [])
+
+        self.assertEqual(test_nodeA, test_nodeB)
+        self.assertNotEqual(test_nodeA, test_nodeC)
+
+    def test_parentnode_to_html(self) -> None:
+        tag = "div"
+        children: list[ParentNode | LeafNode] = [ParentNode("p",[LeafNode(None, "I'm a paragraph")])]
+        props = { "style": "color: black;" }
+
+        test_node = ParentNode(tag, children, props)
+
+        self.assertEqual(test_node.to_html(), f"<{tag} style=\"color: black;\">\n\t<p>I'm a paragraph</p>\n</{tag}>")
