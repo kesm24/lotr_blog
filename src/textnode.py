@@ -136,3 +136,13 @@ def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: 
                 new_nodes.append(TextNode(section, text_type))
 
     return new_nodes
+
+def markdown_to_text_nodes(markdown: str) -> list[TextNode]:
+    text_nodes = [TextNode(markdown, TextType.TEXT)]
+    text_nodes = split_nodes_images(text_nodes)
+    text_nodes = split_nodes_links(text_nodes)
+    text_nodes = split_nodes_delimiter(text_nodes, "**", TextType.BOLD)
+    text_nodes = split_nodes_delimiter(text_nodes, "_", TextType.ITALIC)
+    text_nodes = split_nodes_delimiter(text_nodes, "`", TextType.CODE)
+
+    return text_nodes

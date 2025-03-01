@@ -1,5 +1,11 @@
 import unittest
-from textnode import TextNode, TextType, extract_markdown_images, extract_markdown_links, split_nodes_delimiter, split_nodes_images, split_nodes_links
+from textnode import (
+    TextNode, TextType,
+    extract_markdown_images, split_nodes_images,
+    extract_markdown_links, split_nodes_links,
+    split_nodes_delimiter,
+    markdown_to_text_nodes
+)
 
 class TestTextNode(unittest.TestCase):
     def test_textnode(self) -> None:
@@ -149,3 +155,22 @@ class TestTextNodeUtils(unittest.TestCase):
         ])
 
         self.assertRaises(ValueError, split_nodes_delimiter, [invalid_node], "**", TextType.BOLD)
+
+    def test_markdown_to_text_nodes(self) -> None:
+        test_markdown = "I'm a text Node. I'm a **bold** node. I'm an _italic_ node. I'm a `code` node. I'm an ![image](image.jpeg) image node. I'm a [link](google.com) node"
+
+        test_nodes = markdown_to_text_nodes(test_markdown)
+
+        self.assertEqual(test_nodes, [
+            TextNode("I'm a text Node. I'm a ", TextType.TEXT),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" node. I'm an ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" node. I'm a ", TextType.TEXT),
+            TextNode("code", TextType.CODE),
+            TextNode(" node. I'm an ", TextType.TEXT),
+            TextNode("image", TextType.LINK, "image.jpeg"),
+            TextNode(" image node. I'm a ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "google.com"),
+            TextNode(" node", TextType.TEXT)
+        ])
