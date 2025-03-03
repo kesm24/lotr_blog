@@ -1,7 +1,15 @@
-# import unittest
+import unittest
 
-# from main import main
+from main import extract_title
 
-# class TestMain(unittest.TestCase):
-#     def test_main(self):
-#         self.assertEqual(main("Hello World"), "Hello World")
+class TestMain(unittest.TestCase):
+    def test_extract_title(self) -> None:
+        test_markdown = """
+            # I'm a title
+
+            I'm a paragraph
+        """
+
+        title = extract_title(test_markdown)
+
+        self.assertEqual(title, "I'm a title")
