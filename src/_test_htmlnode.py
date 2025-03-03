@@ -1,5 +1,6 @@
 import unittest
-from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node
+from blocks import BlockType
+from htmlnode import HTMLNode, LeafNode, ParentNode, block_to_html_node, text_node_to_html_node
 from textnode import TextNode, TextType
 
 class TestHTMLNode(unittest.TestCase):
@@ -146,3 +147,18 @@ class TestHTMLNodeUtils(unittest.TestCase):
         test_node = text_node_to_html_node(text_node)
 
         self.assertEqual(test_node.tag, html_node.tag)
+
+    def test_block_to_html_node(self) -> None:
+        paragraph_block = "I'm a paragraph\n with a **bold** node"
+
+        self.assertEqual(
+            block_to_html_node(paragraph_block, BlockType.PARAGRAPH),
+            ParentNode("p",
+                [
+                    LeafNode(None, "I'm a paragraph"),
+                    LeafNode(None, "with a "),
+                    LeafNode("b", "bold"),
+                    LeafNode(None, " node")
+                ]
+            )
+        )

@@ -1,4 +1,5 @@
-from textnode import TextNode, TextType
+from blocks import BlockType, split_block_to_lines
+from textnode import TextNode, TextType, markdown_to_text_nodes
 
 class HTMLNode:
     def __init__(self, tag: str | None = None, props: dict[str, str] | None = None) -> None:
@@ -105,13 +106,22 @@ class ParentNode(HTMLNode):
         html_str += f"{indent_str}<{self.tag}{self.props_to_html()}>"
 
         for child in self.children:
-            if isinstance(child, ParentNode):
+            if isinstance(child, ParentNode) and self.tag != "pre":
                 html_str += f"\n"
                 html_str += f"{child.to_html(indent + 1)}"
             else:
-                html_str += f"{child.to_html()}"
+                child_html = f"{child.to_html()}"
 
-        if isinstance(self.children[0], ParentNode):
+                if self.tag == "code":
+                    if not child_html.strip().startswith("}") and not child_html.strip().endswith("{"):
+                        child_html = child_html.replace("\n", "\n\t", 1)
+                        child_html += "\n"
+                    else:
+                        child_html = child_html.strip()
+
+                html_str += f"{child_html}"
+
+        if isinstance(self.children[0], ParentNode) and self.tag != "pre":
             html_str += f"\n{indent_str}"
 
         html_str += f"</{self.tag}>"
@@ -134,3 +144,43 @@ def text_node_to_html_node(text_node: TextNode) -> LeafNode:
         case TextType.IMAGE:
             assert isinstance(text_node.url, str)
             return LeafNode("img", None, { "src": text_node.url, "alt": text_node.text })
+
+def block_to_html_node(block: str, block_type: BlockType) -> ParentNode:
+    children: list[ParentNode | LeafNode] = []
+
+    lines = split_block_to_lines(block, block_type)
+
+    for line in lines:
+        inner_children: list[ParentNode | LeafNode] = []
+
+        if block_type == BlockType.CODE:
+            line = "\n" + line
+
+        text_nodes = markdown_to_text_nodes(line)
+
+        for text_node in text_nodes:
+            html_node = text_node_to_html_node(text_node)
+            inner_children.append(html_node)
+
+        if block_type in [BlockType.U_LIST, BlockType.O_LIST]:
+            list_node = ParentNode("li", inner_children)
+            children.append(list_node)
+        else:
+            children.extend(inner_children)
+
+    match block_type:
+        case BlockType.PARAGRAPH:
+            return ParentNode("p", children)
+        case BlockType.HEADING:
+            level = len(block.strip().split(" ", maxsplit=1)[0])
+            return ParentNode(f"h{level}", children)
+        case BlockType.CODE:
+            return ParentNode("pre", [
+                ParentNode("code", children)
+            ])
+        case BlockType.QUOTE:
+            return ParentNode("blockquote", children)
+        case BlockType.U_LIST:
+            return ParentNode("ul", children)
+        case BlockType.O_LIST:
+            return ParentNode("ol", children)
