@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 from blocks import block_to_block_type, markdown_to_blocks
 from htmlnode import block_to_html_node
 
@@ -126,9 +127,16 @@ def generate_pages_recursive(src: str, template: str, dest: str) -> None:
             if ext == ".md":
                 generate_page(src_path, template, dest_path.replace(ext, ".html"))
 
-def main() -> None:
-    remove_files("public")
-    copy_files("static", "public")
-    generate_pages_recursive("content", "template.html", "public")
+def main(basepath: str = "./") -> None:
+    if len(sys.argv) > 1:
+        basepath = sys.argv[1]
+    content_path = os.path.join(basepath, "content")
+    template_path = os.path.join(basepath, "template.html")
+    static_path = os.path.join(basepath, "static")
+    public_path = os.path.join(basepath, "docs")
+
+    remove_files(public_path)
+    copy_files(static_path, public_path)
+    generate_pages_recursive(content_path, template_path, public_path)
 
 main()
