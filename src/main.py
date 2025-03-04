@@ -1,12 +1,7 @@
-# def main(hello: str) -> str:
-#     print(hello)
-#     return hello
-
-# main("Hello World")
-
+import os
+import shutil
 from blocks import block_to_block_type, markdown_to_blocks
 from htmlnode import block_to_html_node
-
 
 def extract_title(markdown: str) -> str:
     title = ""
@@ -32,3 +27,33 @@ def markdown_to_html(markdown: str) -> tuple[str, str]:
     content = "\n".join(children)
 
     return (title, content)
+
+def remove_files(dest: str) -> None:
+    if not os.path.exists(dest):
+        return
+
+    for file in os.listdir(dest):
+        dest_path = os.path.join(dest, file)
+
+        if os.path.isdir(dest_path):
+           remove_files(dest_path)
+        else:
+           os.remove(dest_path)
+
+    os.rmdir(dest)
+
+def copy_files(src: str, dest: str) -> None:
+    if not os.path.exists(src) or not os.path.isdir(src):
+        raise NotADirectoryError(f"directory '{src}' does not exist")
+
+    if not os.path.exists(dest):
+        os.mkdir(dest)
+
+    for file in os.listdir(src):
+        src_path = os.path.join(src, file)
+        dest_path = os.path.join(dest, file)
+
+        if os.path.isdir(src_path):
+            copy_files(src_path, dest_path)
+        else:
+            shutil.copyfile(src_path, dest_path)
