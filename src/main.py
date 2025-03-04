@@ -12,7 +12,7 @@ def extract_title(markdown: str) -> str:
 
     return title
 
-def markdown_to_html(markdown: str) -> tuple[str, str]:
+def markdown_to_html(markdown: str, indent: int = 0) -> tuple[str, str]:
     children: list[str] = []
 
     title = extract_title(markdown)
@@ -22,11 +22,11 @@ def markdown_to_html(markdown: str) -> tuple[str, str]:
     for block in blocks:
         block_type = block_to_block_type(block)
         html_node = block_to_html_node(block, block_type)
-        children.append(html_node.to_html(2))
+        children.append(html_node.to_html(indent))
 
     content = "\n".join(children)
 
-    return (title, content)
+    return (title, f"\n{content}\n")
 
 def remove_files(dest: str) -> None:
     if not os.path.exists(dest):
@@ -57,3 +57,44 @@ def copy_files(src: str, dest: str) -> None:
             copy_files(src_path, dest_path)
         else:
             shutil.copyfile(src_path, dest_path)
+
+def generate_page(src: str, template: str, dest: str) -> None:
+    print(f"Generating page from {src} to {dest} using {template}")
+
+    if not os.path.exists(src):
+        raise FileNotFoundError(f"content file '{src}' does not exist")
+
+    if not os.path.isfile(src):
+        raise IsADirectoryError(f"'{src}' is not a file")
+
+    if os.path.splitext(src)[1] != ".md":
+        raise ValueError(f"content file '{src}' is not a markdown file")
+
+    if not os.path.exists(os.path.join(template)):
+        raise FileNotFoundError(f"template '{template}' does not exist")
+
+    if os.path.splitext(template)[1] != ".html":
+        raise ValueError(f"template file '{template}' is not an html file")
+
+    if os.path.splitext(dest)[1] != ".html":
+        raise ValueError(f"destination file '{dest}' must be an html file")
+
+    src_file = open(src)
+    src_contents = src_file.read()
+    src_file.close()
+
+    title, content = markdown_to_html(src_contents, 3)
+
+    template_file = open(template)
+    template_contents = template_file.read()
+    template_file.close()
+
+    dest_contents = template_contents.replace("{{ Title }}", title).replace("{{ Content }}", content)
+
+    dest_dir = os.path.dirname(dest)
+    if not os.path.exists(dest_dir):
+        os.mkdir(dest_dir)
+
+    dest_file = open(dest, "w")
+    dest_file.write(dest_contents)
+    dest_file.close()

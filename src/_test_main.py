@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from main import copy_files, extract_title, markdown_to_html, remove_files
+from main import copy_files, extract_title, generate_page, markdown_to_html, remove_files
 
 class TestMain(unittest.TestCase):
     def test_extract_title(self) -> None:
@@ -26,18 +26,18 @@ class TestMain(unittest.TestCase):
             1. I'm an ordered list
         """
 
-        (title, content) = markdown_to_html(test_markdown)
+        (title, content) = markdown_to_html(test_markdown, 2)
 
         self.assertEqual(title, "I'm a title")
         self.assertEqual(content,"\n\t\t".join([
-            "\t\t<h1>I'm a title</h1>",
+            "\n\t\t<h1>I'm a title</h1>",
             "<p>I'm a paragraph</p>",
             "<ul>",
             "\t<li>I'm an unordered list</li>",
             "</ul>",
             "<ol>",
             "\t<li>I'm an ordered list</li>",
-            "</ol>"
+            "</ol>\n"
         ]))
 
     def test_remove_files(self) -> None:
@@ -55,7 +55,7 @@ class TestMain(unittest.TestCase):
 
         remove_files("test_dest")
 
-        self.assertEqual(os.path.exists("public"), False)
+        self.assertEqual(os.path.exists("test_dest"), False)
 
     def test_copy_files(self) -> None:
         if not os.path.exists("test_src"):
@@ -86,3 +86,22 @@ class TestMain(unittest.TestCase):
         test_file2.close()
         remove_files("test_src")
         remove_files("test_dest")
+
+    def test_generate_page(self) -> None:
+        src = "content/index.md"
+        template = "template.html"
+        dest = "public/index.html"
+
+        generate_page(src, template, dest)
+
+        self.assertTrue(os.path.exists(dest))
+
+        dest_file = open(dest)
+        dest_contents = dest_file.read()
+        dest_file.close()
+
+        self.assertTrue("{{ Title }}" not in dest_contents)
+        self.assertTrue("{{ Content }}" not in dest_contents)
+
+        self.assertTrue("<html>" in dest_contents)
+        self.assertTrue("</html>" in dest_contents)
