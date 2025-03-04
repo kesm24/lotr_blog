@@ -62,7 +62,7 @@ def split_nodes_images(old_nodes: list[TextNode]) -> list[TextNode]:
             if before_text != "":
                 new_nodes.append(TextNode(before_text, TextType.TEXT))
 
-            new_nodes.append(TextNode(alt, TextType.LINK, url))
+            new_nodes.append(TextNode(alt, TextType.IMAGE, url))
 
             remaining_text = after_text
 

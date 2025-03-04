@@ -70,7 +70,7 @@ def generate_page(src: str, template: str, dest: str) -> None:
     if os.path.splitext(src)[1] != ".md":
         raise ValueError(f"content file '{src}' is not a markdown file")
 
-    if not os.path.exists(os.path.join(template)):
+    if not os.path.exists(template):
         raise FileNotFoundError(f"template '{template}' does not exist")
 
     if os.path.splitext(template)[1] != ".html":
@@ -98,3 +98,37 @@ def generate_page(src: str, template: str, dest: str) -> None:
     dest_file = open(dest, "w")
     dest_file.write(dest_contents)
     dest_file.close()
+
+def generate_pages_recursive(src: str, template: str, dest: str) -> None:
+    if not os.path.exists(src) or not os.path.isdir(src):
+        raise NotADirectoryError(f"path '{src}' is not a valid directory")
+
+    if not os.path.exists(template):
+        raise FileNotFoundError(f"template file '{template}' does not exist")
+
+    if os.path.splitext(template)[1] != ".html":
+        raise ValueError(f"template file '{template}' is not an html file")
+
+    if os.path.isfile(dest):
+        raise IsADirectoryError(f"destination '{dest}' is not a directory")
+
+    if not os.path.exists(dest):
+        os.mkdir(dest)
+
+    for file in os.listdir(src):
+        src_path = os.path.join(src, file)
+        dest_path = os.path.join(dest, file)
+        if os.path.isdir(src_path):
+            generate_pages_recursive(src_path, template, dest_path)
+        else:
+            _, ext = os.path.splitext(src_path)
+
+            if ext == ".md":
+                generate_page(src_path, template, dest_path.replace(ext, ".html"))
+
+def main() -> None:
+    remove_files("public")
+    copy_files("static", "public")
+    generate_pages_recursive("content", "template.html", "public")
+
+main()

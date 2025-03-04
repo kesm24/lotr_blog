@@ -69,7 +69,7 @@ class TestTextNodeUtils(unittest.TestCase):
 
         self.assertEqual(test_images1, [
             TextNode("I'm an ", TextType.TEXT),
-            TextNode("image", TextType.LINK, "image.jpeg"),
+            TextNode("image", TextType.IMAGE, "image.jpeg"),
         ])
 
         image_node2 = TextNode("I'm an ![image](image.jpeg) and I'm a ![second image](image2.jpeg)", TextType.TEXT)
@@ -78,9 +78,9 @@ class TestTextNodeUtils(unittest.TestCase):
 
         self.assertEqual(test_images2, [
             TextNode("I'm an ", TextType.TEXT),
-            TextNode("image", TextType.LINK, "image.jpeg"),
+            TextNode("image", TextType.IMAGE, "image.jpeg"),
             TextNode(" and I'm a ", TextType.TEXT),
-            TextNode("second image", TextType.LINK, "image2.jpeg")
+            TextNode("second image", TextType.IMAGE, "image2.jpeg")
         ])
 
     def test_extract_markdown_links(self) -> None:
@@ -172,7 +172,7 @@ class TestTextNodeUtils(unittest.TestCase):
             TextNode(" node. I'm a ", TextType.TEXT),
             TextNode("code", TextType.CODE),
             TextNode(" node. I'm an ", TextType.TEXT),
-            TextNode("image", TextType.LINK, "image.jpeg"),
+            TextNode("image", TextType.IMAGE, "image.jpeg"),
             TextNode(" image node. I'm a ", TextType.TEXT),
             TextNode("link", TextType.LINK, "google.com"),
             TextNode(" node", TextType.TEXT)

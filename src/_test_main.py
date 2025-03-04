@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from main import copy_files, extract_title, generate_page, markdown_to_html, remove_files
+from main import copy_files, extract_title, generate_page, generate_pages_recursive, markdown_to_html, remove_files
 
 class TestMain(unittest.TestCase):
     def test_extract_title(self) -> None:
@@ -105,3 +105,16 @@ class TestMain(unittest.TestCase):
 
         self.assertTrue("<html>" in dest_contents)
         self.assertTrue("</html>" in dest_contents)
+
+    def test_generate_pages_recursive(self) -> None:
+        src = "content"
+        template = "template.html"
+        dest = "public"
+
+        generate_pages_recursive(src, template, dest)
+
+        self.assertTrue(os.path.exists(dest))
+
+        self.assertTrue(os.path.exists("public/index.html"))
+        self.assertTrue(os.path.exists("public/majesty"))
+        self.assertTrue(os.path.exists("public/majesty/index.html"))
