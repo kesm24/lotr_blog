@@ -1,3 +1,3 @@
 #!/bin/sh
 
-python3 src/main.py "/lotr_blog/"
+python3 src/main.py "lotr_blog"
