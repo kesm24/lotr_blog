@@ -92,8 +92,6 @@ def generate_page(basepath: str, src: str, template: str, dest: str) -> None:
 
     dest_contents = template_contents.replace("{{ Title }}", title).replace("{{ Content }}", content)
 
-    if basepath == "./":
-        basepath = "/"
     dest_contents = dest_contents.replace('href="/', f'href="{basepath}').replace('src="/', f'src="{basepath}')
 
     dest_dir = os.path.dirname(dest)
@@ -131,13 +129,14 @@ def generate_pages_recursive(basepath: str, src: str, template: str, dest: str) 
             if ext == ".md":
                 generate_page(basepath, src_path, template, dest_path.replace(ext, ".html"))
 
-def main(basepath: str = "./") -> None:
+def main(basepath: str = "/") -> None:
     if len(sys.argv) > 1:
         basepath = sys.argv[1]
-    content_path = os.path.join(basepath, "content")
-    template_path = os.path.join(basepath, "template.html")
-    static_path = os.path.join(basepath, "static")
-    public_path = os.path.join(basepath, "docs")
+
+    content_path = "content"
+    template_path = "template.html"
+    static_path = "static"
+    public_path = "docs"
 
     remove_files(public_path)
     copy_files(static_path, public_path)
