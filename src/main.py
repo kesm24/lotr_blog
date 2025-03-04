@@ -59,7 +59,7 @@ def copy_files(src: str, dest: str) -> None:
         else:
             shutil.copyfile(src_path, dest_path)
 
-def generate_page(src: str, template: str, dest: str) -> None:
+def generate_page(basepath: str, src: str, template: str, dest: str) -> None:
     print(f"Generating page from {src} to {dest} using {template}")
 
     if not os.path.exists(src):
@@ -92,6 +92,10 @@ def generate_page(src: str, template: str, dest: str) -> None:
 
     dest_contents = template_contents.replace("{{ Title }}", title).replace("{{ Content }}", content)
 
+    if basepath == "./":
+        basepath = "/"
+    dest_contents = dest_contents.replace('href="/', f'href="{basepath}').replace('src="/', f'src="{basepath}')
+
     dest_dir = os.path.dirname(dest)
     if not os.path.exists(dest_dir):
         os.mkdir(dest_dir)
@@ -100,7 +104,7 @@ def generate_page(src: str, template: str, dest: str) -> None:
     dest_file.write(dest_contents)
     dest_file.close()
 
-def generate_pages_recursive(src: str, template: str, dest: str) -> None:
+def generate_pages_recursive(basepath: str, src: str, template: str, dest: str) -> None:
     if not os.path.exists(src) or not os.path.isdir(src):
         raise NotADirectoryError(f"path '{src}' is not a valid directory")
 
@@ -120,12 +124,12 @@ def generate_pages_recursive(src: str, template: str, dest: str) -> None:
         src_path = os.path.join(src, file)
         dest_path = os.path.join(dest, file)
         if os.path.isdir(src_path):
-            generate_pages_recursive(src_path, template, dest_path)
+            generate_pages_recursive(basepath, src_path, template, dest_path)
         else:
             _, ext = os.path.splitext(src_path)
 
             if ext == ".md":
-                generate_page(src_path, template, dest_path.replace(ext, ".html"))
+                generate_page(basepath, src_path, template, dest_path.replace(ext, ".html"))
 
 def main(basepath: str = "./") -> None:
     if len(sys.argv) > 1:
@@ -137,6 +141,6 @@ def main(basepath: str = "./") -> None:
 
     remove_files(public_path)
     copy_files(static_path, public_path)
-    generate_pages_recursive(content_path, template_path, public_path)
+    generate_pages_recursive(basepath, content_path, template_path, public_path)
 
 main()
